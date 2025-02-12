@@ -1,0 +1,106 @@
+package charter
+
+import (
+	"encoding/json"
+	"fmt"
+	"net/http"
+
+	"github.com/go-echarts/go-echarts/v2/charts"
+	"github.com/go-echarts/go-echarts/v2/opts"
+	"github.com/go-echarts/go-echarts/v2/types"
+	"github.com/sirupsen/logrus"
+)
+
+func (c *Charter) jtokenPriceChart(w http.ResponseWriter, r *http.Request) {
+	params, err := getParams(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	logrus.WithFields(logrus.Fields{
+		"start":  params.StartTime,
+		"end":    params.EndTime,
+		"points": params.ChartPoints,
+	}).Info("jToken price chart requested")
+
+	chartPoints, actions, err := c.simulate(params)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	var xAxis []string
+	var jTokenPrice, sTokenPrice, price, abondEntryPrice, minPrice []opts.LineData
+	for _, point := range chartPoints {
+		xAxis = append(xAxis, point.Timestamp.String())
+
+		jTokenPrice = append(jTokenPrice, opts.LineData{Value: point.JTokenPrice})
+		sTokenPrice = append(sTokenPrice, opts.LineData{Value: point.STokenPrice})
+		price = append(price, opts.LineData{Value: point.Price})
+		abondEntryPrice = append(abondEntryPrice, opts.LineData{Value: point.EntryPrice})
+		minPrice = append(minPrice, opts.LineData{Value: point.MinPrice})
+	}
+
+	// create a new line instance
+	line := charts.NewLine()
+	// set some global options like Title/Legend/ToolTip or anything else
+	line.SetGlobalOptions(
+		charts.WithInitializationOpts(opts.Initialization{
+			Theme:  types.ThemeWesteros,
+			Width:  "100%",
+			Height: "800px",
+		}),
+		charts.WithTitleOpts(opts.Title{
+			Title:    "jToken price",
+			Subtitle: fmt.Sprintf("showing data from %s to %s", params.StartTime, params.EndTime),
+		}),
+		charts.WithLegendOpts(opts.Legend{
+			Show:   true,
+			Orient: "horizontal",
+			Top:    "0",
+			Right:  "0",
+		}),
+		charts.WithTooltipOpts(opts.Tooltip{
+			Show: true,
+		}),
+		charts.WithDataZoomOpts(opts.DataZoom{
+			Type:       "inside",
+			Start:      0,
+			End:        100,
+			XAxisIndex: []int{0},
+		}),
+		charts.WithDataZoomOpts(opts.DataZoom{
+			Type:       "slider",
+			Start:      0,
+			End:        100,
+			XAxisIndex: []int{0},
+		}),
+	)
+
+	line.ExtendYAxis(opts.YAxis{})
+
+	line.AddSeries("jTokenPrice", jTokenPrice).
+		AddSeries("sTokenPrice", sTokenPrice)
+
+	line.SetXAxis(xAxis).
+		AddSeries("Price", price,
+			charts.WithLineStyleOpts(opts.LineStyle{Color: "red", Width: 2, Type: "dotted"}),
+			charts.WithLineChartOpts(opts.LineChart{YAxisIndex: 1}),
+		).
+		AddSeries("Abond EntryPrice", abondEntryPrice,
+			charts.WithLineStyleOpts(opts.LineStyle{Color: "green", Width: 2, Type: "dotted"}),
+			charts.WithLineChartOpts(opts.LineChart{YAxisIndex: 1}),
+		).
+		AddSeries("Abond MinPrice", minPrice,
+			charts.WithLineStyleOpts(opts.LineStyle{Color: "indigo", Width: 2, Type: "dotted"}),
+			charts.WithLineChartOpts(opts.LineChart{YAxisIndex: 1}),
+		)
+
+	line.Render(w)
+
+	data, _ := json.MarshalIndent(map[string]interface{}{
+		"actions": actions,
+	}, "", "  ")
+	w.Write([]byte("<pre>" + string(data) + "</pre>"))
+}

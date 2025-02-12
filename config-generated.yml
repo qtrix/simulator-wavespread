@@ -1,0 +1,32 @@
+api:
+    # Enable development cors for HTTP API
+    dev-cors: false
+    # Allowed host for HTTP API dev cors
+    dev-cors-host: ""
+    # HTTP API port
+    port: "3001"
+db:
+    # Auto run database migrations
+    automigrate: true
+    # Database name
+    dbname: simulator
+    # Database host
+    host: localhost
+    # Database port
+    port: "5432"
+    # Database sslmode
+    sslmode: disable
+    # Database user
+    user: core
+# Display debug messages
+logging: '*=info'
+sow:
+    paprika:
+        # CoinPaprika coin ID
+        coinid: eth-ethereum
+        # Price data interval (5m 10m 15m 30m 45m 1h 2h 3h 6h 12h 24h 1d 7d 14d 30d 90d 365d)
+        interval: 5m
+        # Date and time of scraping start
+        start: 1 jan 2020
+        # Date and time of scraping end, inclusive
+        stop: 31 dec 2020
