@@ -3,7 +3,7 @@ package cmd
 import "github.com/spf13/cobra"
 
 func addDBFlags(cmd *cobra.Command) {
-	cmd.PersistentFlags().String("db.connection-string", "", "Postgres connection string.")
+	cmd.PersistentFlags().String("db.connection-string", "postgres://uedecbulm85jjt:p6b28792047f99761090529f6628d7fea044ce2931930c966d6d5a86ffba5e637@c1i13pt05ja4ag.cluster-czrs8kj4isg7.us-east-1.rds.amazonaws.com:5432/da1jjt82naeovd", "Postgres connection string.")
 	cmd.PersistentFlags().String("db.host", "localhost", "Database host")
 	cmd.PersistentFlags().String("db.port", "5432", "Database port")
 	cmd.PersistentFlags().String("db.sslmode", "disable", "Database sslmode")
