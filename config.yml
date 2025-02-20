@@ -1,7 +1,7 @@
 # api-related fields
 api:
   # The port on which the API will be exposed (default:3001)
-  port: 8080
+  port: 44641
 
   # Enable/disable development CORS
   dev-cors: true
