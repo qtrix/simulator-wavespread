@@ -15,8 +15,8 @@ func addDBFlags(cmd *cobra.Command) {
 
 func addAPIFlags(cmd *cobra.Command) {
 	cmd.Flags().String("api.port", "3001", "HTTP API port")
-	cmd.Flags().Bool("api.dev-cors", false, "Enable development cors for HTTP API")
-	cmd.Flags().String("api.dev-cors-host", "", "Allowed host for HTTP API dev cors")
+	cmd.Flags().Bool("api.dev-cors", true, "Enable development cors for HTTP API")
+	cmd.Flags().String("api.dev-cors-host", "*", "Allowed host for HTTP API dev cors")
 }
 
 func addCoinApiFlags(cmd *cobra.Command) {
