@@ -27,13 +27,15 @@ func New(config Config, db *db.DB) *API {
 func (a *API) Run() {
 	a.engine = gin.Default()
 
+	a.engine = gin.Default()
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		fmt.Println("PORT environment variable is not set")
 	}
 	a.engine.Use(cors.Default())
 	a.setRoutes()
-	
+
 	logrus.Infof("starting api on port %s", a.config.Port)
 	err := a.engine.Run(":" + port)
 	if err != nil {
