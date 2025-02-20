@@ -1,0 +1,55 @@
+# api-related fields
+api:
+  # The port on which the API will be exposed (default:3001)
+  port: 3001
+
+  # Enable/disable development CORS
+  dev-cors: true
+
+  # Allowed hosts for HTTP API development CORS
+  dev-cors-host: "*"
+
+# database fields
+db:
+  # Database host
+  host: "c1i13pt05ja4ag.cluster-czrs8kj4isg7.us-east-1.rds.amazonaws.com"
+
+  # Database port
+  port: 5432
+
+  # Database sslmode
+  sslmode: "disable"
+
+  # Database name
+  dbname: "da1jjt82naeovd"
+
+  # Database user (also allowed via PG_USER env var)
+  user: "uedecbulm85jjt"
+
+  # Database password
+  password: "p6b28792047f99761090529f6628d7fea044ce2931930c966d6d5a86ffba5e637"
+
+  # Database connection string
+  connection-string: "postgres://uedecbulm85jjt:p6b28792047f99761090529f6628d7fea044ce2931930c966d6d5a86ffba5e637@c1i13pt05ja4ag.cluster-czrs8kj4isg7.us-east-1.rds.amazonaws.com:5432/da1jjt82naeovd"
+  # Auto run database migrations
+  automigrate: true
+
+# Modules
+sow:
+
+  # CoinPaprika price scraper
+  coinapi:
+
+    # Coin to fetch pricing data for
+    coinid: BITSTAMP_SPOT_ETH_USD
+
+    # Price intervals
+    interval: 10MIN
+
+    # Start of pricing data
+    start: 2024-01-01T13:05:07Z
+
+    # End of pricing data
+    stop: 2025-02-13T13:05:07Z
+# Control what to be logged using format "module=level,module=level"; `*` means all other modules
+logging: "*=trace"
