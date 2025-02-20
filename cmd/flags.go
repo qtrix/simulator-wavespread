@@ -10,7 +10,7 @@ func addDBFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().String("db.dbname", "simulator", "Database name")
 	cmd.PersistentFlags().String("db.user", "core", "Database user")
 	cmd.PersistentFlags().String("db.password", "password", "Database password")
-	cmd.PersistentFlags().Bool("db.automigrate", true, "Auto run database migrations")
+	cmd.PersistentFlags().Bool("db.automigrate", false, "Auto run database migrations")
 }
 
 func addAPIFlags(cmd *cobra.Command) {
