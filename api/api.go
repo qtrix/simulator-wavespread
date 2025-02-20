@@ -1,10 +1,12 @@
 package api
 
 import (
+	"fmt"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/qtrix/simulator-wavespread/db"
 	"github.com/sirupsen/logrus"
+	"os"
 )
 
 var log = logrus.WithField("module", "api")
@@ -25,19 +27,15 @@ func New(config Config, db *db.DB) *API {
 func (a *API) Run() {
 	a.engine = gin.Default()
 
-	if a.config.DevCors {
-		a.engine.Use(cors.New(cors.Config{
-			AllowOrigins:     []string{a.config.DevCorsHost},
-			AllowMethods:     []string{"PUT", "PATCH", "GET", "POST"},
-			AllowHeaders:     []string{"Origin"},
-			ExposeHeaders:    []string{"Content-Length"},
-			AllowCredentials: true,
-		}))
+	port := os.Getenv("PORT")
+	if port == "" {
+		fmt.Println("PORT environment variable is not set")
 	}
-
+	a.engine.Use(cors.Default())
 	a.setRoutes()
-
-	err := a.engine.Run(":" + a.config.Port)
+	
+	logrus.Infof("starting api on port %s", a.config.Port)
+	err := a.engine.Run(":" + port)
 	if err != nil {
 		log.Fatal(err)
 	}
