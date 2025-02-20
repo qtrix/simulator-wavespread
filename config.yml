@@ -32,7 +32,7 @@ db:
   # Database connection string
   connection-string: "postgres://uedecbulm85jjt:p6b28792047f99761090529f6628d7fea044ce2931930c966d6d5a86ffba5e637@c1i13pt05ja4ag.cluster-czrs8kj4isg7.us-east-1.rds.amazonaws.com:5432/da1jjt82naeovd"
   # Auto run database migrations
-  automigrate: true
+  automigrate: false
 
 # Modules
 sow:
