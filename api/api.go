@@ -27,16 +27,17 @@ func New(config Config, db *db.DB) *API {
 func (a *API) Run() {
 	a.engine = gin.Default()
 
-	a.engine = gin.Default()
-
 	port := os.Getenv("PORT")
 	if port == "" {
-		fmt.Println("PORT environment variable is not set")
+		port = "8080" // Default port for local testing
+		fmt.Println("PORT environment variable is not set. Using default:", port)
 	}
+
 	a.engine.Use(cors.Default())
 	a.setRoutes()
 
-	logrus.Infof("starting api on port %s", a.config.Port)
+	logrus.Infof("starting api on port %s", port) // <- Use the correct port variable
+
 	err := a.engine.Run(":" + port)
 	if err != nil {
 		log.Fatal(err)
