@@ -40,5 +40,5 @@ func init() {
 
 	addAPIFlags(generateConfigCmd)
 	addDBFlags(generateConfigCmd)
-	addPaprikaFlags(generateConfigCmd)
+	addCoinApiFlags(generateConfigCmd)
 }

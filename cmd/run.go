@@ -3,16 +3,15 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"github.com/qtrix/simulator-wavespread/sower/coinapi"
 	"os"
 	"os/signal"
 	"time"
 
-	"github.com/coinpaprika/coinpaprika-api-go-client/coinpaprika"
 	"github.com/hashicorp/go-retryablehttp"
 	"github.com/qtrix/simulator-wavespread/api"
 	"github.com/qtrix/simulator-wavespread/db"
-	"github.com/qtrix/simulator-wavespread/smartalpha/charter"
-	"github.com/qtrix/simulator-wavespread/sower/paprika"
+	"github.com/qtrix/simulator-wavespread/wavespread/charter"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -29,8 +28,8 @@ var runCmd = &cobra.Command{
 		var dbCfg db.Config
 		mustGetSubconfig(viper.GetViper(), "db", &dbCfg)
 
-		var paprikaCfg paprika.Config
-		mustGetSubconfig(viper.GetViper(), "sow.paprika", &paprikaCfg)
+		var coinapiCfg coinapi.Config
+		mustGetSubconfig(viper.GetViper(), "sow.coinapi", &coinapiCfg)
 
 		var apiCfg api.Config
 		mustGetSubconfig(viper.GetViper(), "api", &apiCfg)
@@ -45,9 +44,7 @@ var runCmd = &cobra.Command{
 		retryClient.HTTPClient.Timeout = time.Second * 10
 		// retryClient.Logger = nil
 
-		paprikaClient := coinpaprika.NewClient(retryClient.StandardClient())
-
-		sower, err := paprika.New(paprikaClient, paprikaCfg, store)
+		sower, err := coinapi.New(coinapiCfg, store, retryClient.HTTPClient)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -79,6 +76,6 @@ func init() {
 	RootCmd.AddCommand(runCmd)
 
 	addDBFlags(runCmd)
-	addPaprikaFlags(runCmd)
-	addSmartAlphaFlags(runCmd)
+	addCoinApiFlags(runCmd)
+	addWavespreadFlags(runCmd)
 }

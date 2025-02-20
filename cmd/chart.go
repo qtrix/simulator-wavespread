@@ -6,7 +6,7 @@ import (
 	"os/signal"
 
 	"github.com/qtrix/simulator-wavespread/api"
-	"github.com/qtrix/simulator-wavespread/smartalpha/charter"
+	"github.com/qtrix/simulator-wavespread/wavespread/charter"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -16,7 +16,7 @@ import (
 
 var chartCmd = &cobra.Command{
 	Use:   "chart",
-	Short: "Generate pool composition chart for SmartAlpha",
+	Short: "Generate pool composition chart for Wavespread",
 	Run: func(cmd *cobra.Command, args []string) {
 		// exit signals and cancellations
 		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
@@ -51,5 +51,5 @@ func init() {
 	RootCmd.AddCommand(chartCmd)
 
 	addDBFlags(chartCmd)
-	addSmartAlphaFlags(chartCmd)
+	addWavespreadFlags(chartCmd)
 }
