@@ -52,4 +52,5 @@ func init() {
 
 	addDBFlags(chartCmd)
 	addWavespreadFlags(chartCmd)
+	addAPIFlags(chartCmd)
 }

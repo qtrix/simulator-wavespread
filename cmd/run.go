@@ -78,4 +78,5 @@ func init() {
 	addDBFlags(runCmd)
 	addCoinApiFlags(runCmd)
 	addWavespreadFlags(runCmd)
+	addAPIFlags(runCmd)
 }
