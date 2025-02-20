@@ -1,0 +1,1 @@
+web: ./simulator-wavespread chart --config ../config.yaml
