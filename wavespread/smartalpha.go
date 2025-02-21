@@ -310,11 +310,10 @@ func (sa *Wavespread) SwitchSideAnchorToSurfer(user string) error {
 
 	//first we check for the user in the anchor queue
 	var p *AnchorPosition
-	var i int
-	for idx, v := range sa.anchors {
+
+	for _, v := range sa.anchors {
 		if v.Owner == user {
 			p = v
-			i = idx
 			break
 		}
 	}
@@ -343,11 +342,10 @@ func (sa *Wavespread) SwitchSideSurferToAnchor(user string) error {
 
 	//first we check for the user in the surfer queue
 	var p *SurferPosition
-	var i int
-	for idx, v := range sa.surfers {
+
+	for _, v := range sa.surfers {
 		if v.Owner == user {
 			p = v
-			i = idx
 			break
 		}
 	}
@@ -367,7 +365,7 @@ func (sa *Wavespread) SwitchSideSurferToAnchor(user string) error {
 		Amount:    p.Amount,
 		EntryTime: ts,
 	})
-	
+
 	return nil
 }
 
