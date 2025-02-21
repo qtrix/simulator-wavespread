@@ -141,22 +141,31 @@ func (sa *Wavespread) StartNextEpoch() error {
 	/// @dev Users can increase their queue amount but can't exit the queue
 	/// @param amountAnchorTokens The amount of tokens the user wants to move to surfer side
 	logrus.WithField("count", len(sa.SwitchSideQueueAnchorToSurfer)).Info("processing anchor to surfer switch queue")
-	for _, s := range sa.SwitchSideQueueAnchorToSurfer {
-		// calculate the amount to burn for the user
-		amount := s.ATokenBalance.Mul(anchorTokenPrice)
-		//calculate the amount of stokens to mint for the user
-		// amount * anchorTokenPrice / surferTokenPrice
-		STokenAmount := amount.Mul(anchorTokenPrice).Div(surferTokenPrice)
+	spew.Dump(sa.SwitchSideQueueAnchorToSurfer)
+	spew.Dump(sa.AnchorTokenSupply)
+	spew.Dump(sa.TotalAnchors)
 
-		sa.AnchorTokenSupply = sa.AnchorTokenSupply.Sub(s.ATokenBalance)
-		sa.TotalAnchors = sa.TotalAnchors.Sub(amount)
+	for _, s := range sa.SwitchSideQueueAnchorToSurfer {
+		// calculate the amount in underlying tokens for the user
+		//amount := s.ATokenBalance.Mul(anchorTokenPrice)
+		//calculate the amount of surfer tokens to mint for the user
+
+		//this would be burned
+		aTokenAmount := s.Amount.Div(anchorTokenPrice)
+		sa.AnchorTokenSupply = sa.AnchorTokenSupply.Sub(aTokenAmount)
+		sa.TotalAnchors = sa.TotalAnchors.Sub(s.Amount)
+
+		//now we mint new surfers tokens based on amount
+		STokenAmount := s.Amount.Div(surferTokenPrice)
+		// mint the sTokens
 		sa.SurferTokenSupply = sa.SurferTokenSupply.Add(STokenAmount)
 
 		a := &SurferPosition{
-			Owner:      s.Owner,
-			Amount:     STokenAmount,
-			EntryTime:  ts,
-			EntryPrice: ep,
+			Owner:         s.Owner,
+			Amount:        s.Amount,
+			EntryTime:     ts,
+			EntryPrice:    ep,
+			STokenBalance: STokenAmount,
 		}
 
 		sa.surfers = append(sa.surfers, a)
@@ -174,20 +183,19 @@ func (sa *Wavespread) StartNextEpoch() error {
 	logrus.WithField("count", len(sa.SwitchSideQueueSurferToAnchor)).Info("processing surfer to anchor switch queue")
 	for _, s := range sa.SwitchSideQueueSurferToAnchor {
 		// Calculate the amount to burn for the user
-		amount := s.STokenBalance.Mul(surferTokenPrice)
+		//this would be burned
+		sTokenAmount := s.Amount.Div(surferTokenPrice)
+		sa.SurferTokenSupply = sa.SurferTokenSupply.Sub(sTokenAmount)
 
-		// Calculate the amount of ATokens to mint for the user
-		// amount * surferTokenPrice / anchorTokenPrice
-		ATokenAmount := amount.Mul(surferTokenPrice).Div(anchorTokenPrice)
-
-		// Update supply and balances
-		sa.SurferTokenSupply = sa.SurferTokenSupply.Sub(s.STokenBalance)
+		//now we mint new surfers tokens based on amount
+		ATokenAmount := s.Amount.Div(anchorTokenPrice)
 		sa.AnchorTokenSupply = sa.AnchorTokenSupply.Add(ATokenAmount)
+		sa.TotalAnchors = sa.TotalAnchors.Add(s.Amount)
 
 		// Create a new anchor position
 		a := &AnchorPosition{
 			Owner:         s.Owner,
-			Amount:        ATokenAmount,
+			Amount:        s.Amount,
 			EntryTime:     ts,
 			EntryPrice:    ep,
 			ATokenBalance: ATokenAmount,
