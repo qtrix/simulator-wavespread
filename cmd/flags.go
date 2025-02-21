@@ -29,8 +29,8 @@ func addCoinApiFlags(cmd *cobra.Command) {
 func addWavespreadFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool("log-anchor-redeem", false, "Enable logs for anchorRedeem function")
 	cmd.Flags().Bool("log-anchor-deposit", false, "Enable logs for anchorDeposit function")
-	cmd.Flags().Bool("anchor-exit-enabled", false, "Enable anchor exits")
-	cmd.Flags().Bool("surfer-exit-enabled", false, "Enable surfer exits")
+	cmd.Flags().Bool("anchor-exit-enabled", true, "Enable anchor exits")
+	cmd.Flags().Bool("surfer-exit-enabled", true, "Enable surfer exits")
 	cmd.Flags().Bool("surfer-switch-side-anchor-enabled", true, "Enable surfer switch side exits")
 	cmd.Flags().Bool("anchor-switch-side-surfer-enabled", true, "Enable anchor switch side exits")
 }
