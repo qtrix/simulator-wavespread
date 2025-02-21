@@ -117,11 +117,11 @@ func (sa *Wavespread) StartNextEpoch() error {
 		sa.TotalAnchors = sa.TotalAnchors.Add(s.Amount)
 		sa.TotalBalance = sa.TotalBalance.Add(s.Amount)
 
-		sTokenAmount := s.Amount.Div(anchorTokenPrice)
+		aTokenAmount := s.Amount.Div(anchorTokenPrice)
 
-		sa.STokenSupply = sa.STokenSupply.Add(sTokenAmount)
+		sa.ATokenSupply = sa.ATokenSupply.Add(aTokenAmount)
 
-		s.ATokenBalance = sTokenAmount
+		s.ATokenBalance = aTokenAmount
 		s.EntryPrice = ep
 
 		sa.anchors = append(sa.anchors, s)
@@ -140,7 +140,7 @@ func (sa *Wavespread) StartNextEpoch() error {
 	/// @dev Their tokens will be burned when the epoch is finalized and the underlying due will be moved to the surfer side of the pool.
 	/// @dev Users can increase their queue amount but can't exit the queue
 	/// @param amountAnchorTokens The amount of tokens the user wants to move to surfer side
-	logrus.WithField("count", len(sa.SwitchSideQueueAnchorToSurfer)).Info("processing senior to junior switch queue")
+	logrus.WithField("count", len(sa.SwitchSideQueueAnchorToSurfer)).Info("processing anchor to surfer switch queue")
 	for _, s := range sa.SwitchSideQueueAnchorToSurfer {
 		// calculate the amount to burn for the user
 		amount := s.ATokenBalance.Mul(anchorTokenPrice)
@@ -171,7 +171,7 @@ func (sa *Wavespread) StartNextEpoch() error {
 		sa.anchors = newAnchors
 	}
 
-	logrus.WithField("count", len(sa.SwitchSideQueueSurferToAnchor)).Info("processing junior to senior switch queue")
+	logrus.WithField("count", len(sa.SwitchSideQueueSurferToAnchor)).Info("processing surfer to anchor switch queue")
 	for _, s := range sa.SwitchSideQueueSurferToAnchor {
 		// Calculate the amount to burn for the user
 		amount := s.STokenBalance.Mul(surferTokenPrice)

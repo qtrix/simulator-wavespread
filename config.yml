@@ -47,9 +47,9 @@ sow:
     interval: 10MIN
 
     # Start of pricing data
-    start: 2024-01-01T13:05:07Z
+    start: 2023-12-25T13:05:07Z
 
     # End of pricing data
-    stop: 2025-02-13T13:05:07Z
+    stop: 2025-02-20T13:05:07Z
 # Control what to be logged using format "module=level,module=level"; `*` means all other modules
 logging: "*=trace"
