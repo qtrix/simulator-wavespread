@@ -20,8 +20,8 @@ type Wavespread struct {
 	UpsideExposureRate     decimal.Decimal
 	DownsideProtectionRate decimal.Decimal
 
-	ATokenSupply decimal.Decimal //anchors
-	STokenSupply decimal.Decimal //surfers
+	AnchorTokenSupply decimal.Decimal //anchors
+	SurferTokenSupply decimal.Decimal //surfers
 
 	TotalBalance decimal.Decimal
 	TotalAnchors decimal.Decimal
@@ -77,12 +77,12 @@ func (sa *Wavespread) StartNextEpoch() error {
 
 	// 3. process the entry and exit queues
 
-	surferTokenPrice, err := sa.STokenPrice()
+	surferTokenPrice, err := sa.SurferTokenPrice()
 	if err != nil {
 		return errors.Wrap(err, "could not get jToken price")
 	}
 
-	anchorTokenPrice, err := sa.ATokenPrice()
+	anchorTokenPrice, err := sa.AnchorTokenPrice()
 	if err != nil {
 		return errors.Wrap(err, "could not get sToken price")
 	}
@@ -95,7 +95,7 @@ func (sa *Wavespread) StartNextEpoch() error {
 		STokenAmount := j.Amount.Div(surferTokenPrice)
 
 		// mint the jTokens
-		sa.STokenSupply = sa.STokenSupply.Add(STokenAmount)
+		sa.SurferTokenSupply = sa.SurferTokenSupply.Add(STokenAmount)
 
 		// update the junior position
 		j.EntryPrice = ep
@@ -108,7 +108,7 @@ func (sa *Wavespread) StartNextEpoch() error {
 	for _, j := range sa.ExitQueueSurfers {
 		amount := j.STokenBalance.Mul(surferTokenPrice)
 
-		sa.STokenSupply = sa.STokenSupply.Sub(j.STokenBalance)
+		sa.SurferTokenSupply = sa.SurferTokenSupply.Sub(j.STokenBalance)
 		sa.TotalBalance = sa.TotalBalance.Sub(amount)
 	}
 
@@ -119,7 +119,7 @@ func (sa *Wavespread) StartNextEpoch() error {
 
 		aTokenAmount := s.Amount.Div(anchorTokenPrice)
 
-		sa.ATokenSupply = sa.ATokenSupply.Add(aTokenAmount)
+		sa.AnchorTokenSupply = sa.AnchorTokenSupply.Add(aTokenAmount)
 
 		s.ATokenBalance = aTokenAmount
 		s.EntryPrice = ep
@@ -131,7 +131,7 @@ func (sa *Wavespread) StartNextEpoch() error {
 	for _, s := range sa.ExitQueueAnchors {
 		amount := s.ATokenBalance.Mul(anchorTokenPrice)
 
-		sa.ATokenSupply = sa.ATokenSupply.Sub(s.ATokenBalance)
+		sa.AnchorTokenSupply = sa.AnchorTokenSupply.Sub(s.ATokenBalance)
 		sa.TotalAnchors = sa.TotalAnchors.Sub(amount)
 		sa.TotalBalance = sa.TotalBalance.Sub(amount)
 	}
@@ -148,9 +148,9 @@ func (sa *Wavespread) StartNextEpoch() error {
 		// amount * anchorTokenPrice / surferTokenPrice
 		STokenAmount := amount.Mul(anchorTokenPrice).Div(surferTokenPrice)
 
-		sa.ATokenSupply = sa.ATokenSupply.Sub(s.ATokenBalance)
+		sa.AnchorTokenSupply = sa.AnchorTokenSupply.Sub(s.ATokenBalance)
 		sa.TotalAnchors = sa.TotalAnchors.Sub(amount)
-		sa.STokenSupply = sa.STokenSupply.Add(STokenAmount)
+		sa.SurferTokenSupply = sa.SurferTokenSupply.Add(STokenAmount)
 
 		a := &SurferPosition{
 			Owner:      s.Owner,
@@ -181,8 +181,8 @@ func (sa *Wavespread) StartNextEpoch() error {
 		ATokenAmount := amount.Mul(surferTokenPrice).Div(anchorTokenPrice)
 
 		// Update supply and balances
-		sa.STokenSupply = sa.STokenSupply.Sub(s.STokenBalance)
-		sa.ATokenSupply = sa.ATokenSupply.Add(ATokenAmount)
+		sa.SurferTokenSupply = sa.SurferTokenSupply.Sub(s.STokenBalance)
+		sa.AnchorTokenSupply = sa.AnchorTokenSupply.Add(ATokenAmount)
 
 		// Create a new anchor position
 		a := &AnchorPosition{
@@ -259,8 +259,6 @@ func (sa *Wavespread) DepositAnchor(user string, amount decimal.Decimal) error {
 
 func (sa *Wavespread) ExitAnchor(user string) error {
 	var p *AnchorPosition
-	spew.Dump("first ------------------ ", user)
-	spew.Dump("anchors already queueud ----------- ", sa.anchors)
 	for _, v := range sa.anchors {
 		if v.Owner == user {
 			spew.Dump("----------------------", user, "----------------", v.Owner)
@@ -285,9 +283,6 @@ func (sa *Wavespread) ExitAnchor(user string) error {
 
 func (sa *Wavespread) ExitSurfer(user string) error {
 	var p *SurferPosition
-	spew.Dump("first ------------------ ", user)
-	spew.Dump("surfers already queueud ----------- ", sa.surfers)
-
 	for _, v := range sa.surfers {
 		if v.Owner == user {
 			spew.Dump("----------------------", user, "----------------", v.Owner)
@@ -340,9 +335,6 @@ func (sa *Wavespread) SwitchSideAnchorToSurfer(user string) error {
 		EntryTime: ts,
 	})
 
-	//remove the user from the anchor queue
-	sa.anchors = append(sa.anchors[:i], sa.anchors[i+1:]...)
-
 	return nil
 }
 
@@ -375,9 +367,7 @@ func (sa *Wavespread) SwitchSideSurferToAnchor(user string) error {
 		Amount:    p.Amount,
 		EntryTime: ts,
 	})
-
-	//remove the user from the surfer queue
-	sa.surfers = append(sa.surfers[:i], sa.surfers[i+1:]...)
+	
 	return nil
 }
 

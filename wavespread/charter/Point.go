@@ -54,12 +54,12 @@ func (c *Charter) getPoint(sa *wavespread.Wavespread) (*Point, error) {
 		return nil, errors.Wrap(err, "could not get price")
 	}
 
-	surferTokenPrice, err := sa.STokenPrice()
+	surferTokenPrice, err := sa.SurferTokenPrice()
 	if err != nil {
 		return nil, errors.Wrap(err, "could not get surfer token price")
 	}
 
-	anchorTokenPrice, err := sa.ATokenPrice()
+	anchorTokenPrice, err := sa.AnchorTokenPrice()
 	if err != nil {
 		return nil, errors.Wrap(err, "could not get anchor Token price")
 	}
