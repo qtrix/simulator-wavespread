@@ -27,16 +27,24 @@ func New(config Config, db *db.DB) *API {
 func (a *API) Run() {
 	a.engine = gin.Default()
 
+	// Manually configure CORS to allow all origins
+	a.engine.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"*"}, // Allow all origins
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+	}))
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080" // Default port for local testing
 		fmt.Println("PORT environment variable is not set. Using default:", port)
 	}
 
-	a.engine.Use(cors.Default())
 	a.setRoutes()
 
-	logrus.Infof("starting api on port %s", port) // <- Use the correct port variable
+	logrus.Infof("starting api on port %s", port)
 
 	err := a.engine.Run(":" + port)
 	if err != nil {
