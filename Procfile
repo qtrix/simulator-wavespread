@@ -1,1 +1,1 @@
-web: PORT=$PORT ./bin/simulator-wavespread chart --config ../../config.yaml  --api.port $PORT
+web: PORT=$PORT ./bin/simulator-wavespread chart --config ../../config.yaml  --api.port $PORT --api.dev-cors true --api.dev-cors-host *
