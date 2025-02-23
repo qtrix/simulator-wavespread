@@ -9,38 +9,53 @@ func (sa *Wavespread) MinPrice() decimal.Decimal {
 	return sa.EntryPrice.Mul(decimal.NewFromInt(1).Sub(sa.DownsideProtectionRate))
 }
 
+// anchor loss - surfer profits : total loss
 func (sa *Wavespread) TotalLoss() (decimal.Decimal, error) {
 	currentPrice, err := sa.GetCurrentPrice()
 	if err != nil {
 		return decimal.Zero, errors.Wrap(err, "could not get current price")
 	}
-
-	calcPrice := decimal.Max(
-		decimal.Min(currentPrice, sa.EntryPrice),
-		sa.MinPrice(),
-	)
-
-	if calcPrice.Equal(decimal.Zero) {
+	if currentPrice.LessThanOrEqual(sa.EntryPrice) {
 		return decimal.Zero, nil
 	}
 
-	x := sa.EntryPrice.Div(calcPrice).Sub(OneDec)
+	x := currentPrice.Sub(sa.EntryPrice)
+	y := OneDec.Sub(sa.DownsideProtectionRate)
 
-	return sa.TotalAnchors.Mul(x).Round(18), nil
+	return x.Mul(y).Mul(sa.TotalAnchors).Div(currentPrice).Round(18), nil
 }
 
+// anchor profit : total profits
 func (sa *Wavespread) TotalProfits() (decimal.Decimal, error) {
 	currentPrice, err := sa.GetCurrentPrice()
 	if err != nil {
 		return decimal.Zero, errors.Wrap(err, "could not get current price")
 	}
 
-	calcPrice := decimal.Min(currentPrice, sa.EntryPrice)
+	if sa.EntryPrice.LessThanOrEqual(currentPrice) {
+		return decimal.Zero, nil
+	}
 
-	x := OneDec.Sub(calcPrice.Div(currentPrice))
-	y := OneDec.Sub(sa.UpsideExposureRate)
+	minPrice := (sa.EntryPrice.Mul(OneDec.Sub(sa.DownsideProtectionRate))).Round(18).Add(decimal.NewFromInt(1))
 
-	return x.Mul(y).Mul(sa.TotalAnchors).Round(18), nil
+	if sa.EntryPrice.LessThanOrEqual(minPrice) {
+		return decimal.Zero, nil
+	}
+
+	calcPrice := currentPrice
+	if calcPrice.LessThan(minPrice) {
+		calcPrice = minPrice
+	}
+
+	return (sa.TotalAnchors.Mul(sa.EntryPrice)).Div(calcPrice.Sub(sa.TotalAnchors)), nil
+
+	//x := currentPrice.Sub(sa.EntryPrice)
+	//y := OneDec.Sub(sa.UpsideExposureRate)
+	//
+	////x := OneDec.Sub(calcPrice.Div(currentPrice))
+	////y := OneDec.Sub(sa.UpsideExposureRate)
+	//
+	//return x.Mul(y).Mul(sa.TotalAnchors).Div(currentPrice).Round(18), nil
 }
 
 func (sa *Wavespread) MaxProtectionAmount() decimal.Decimal {
