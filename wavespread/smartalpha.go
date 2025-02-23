@@ -13,15 +13,15 @@ type Wavespread struct {
 	oracle interfaces.IOracle
 	Clock  interfaces.IClock
 
-	anchors []*AnchorPosition
-	surfers []*SurferPosition
+	Anchors []*AnchorPosition
+	Surfers []*SurferPosition
 
 	EntryPrice             decimal.Decimal
 	UpsideExposureRate     decimal.Decimal
 	DownsideProtectionRate decimal.Decimal
 
-	AnchorTokenSupply decimal.Decimal //anchors
-	SurferTokenSupply decimal.Decimal //surfers
+	AnchorTokenSupply decimal.Decimal //Anchors
+	SurferTokenSupply decimal.Decimal //Surfers
 
 	TotalBalance decimal.Decimal
 	TotalAnchors decimal.Decimal
@@ -87,7 +87,7 @@ func (sa *Wavespread) StartNextEpoch() error {
 		return errors.Wrap(err, "could not get sToken price")
 	}
 
-	logrus.WithField("count", len(sa.EntryQueueSurfers)).Info("processing surfers entry queue")
+	logrus.WithField("count", len(sa.EntryQueueSurfers)).Info("processing Surfers entry queue")
 	for _, j := range sa.EntryQueueSurfers {
 		sa.TotalBalance = sa.TotalBalance.Add(j.Amount)
 
@@ -101,10 +101,10 @@ func (sa *Wavespread) StartNextEpoch() error {
 		j.EntryPrice = ep
 		j.STokenBalance = STokenAmount
 
-		sa.surfers = append(sa.surfers, j)
+		sa.Surfers = append(sa.Surfers, j)
 	}
 
-	logrus.WithField("count", len(sa.ExitQueueSurfers)).Info("processing surfers exit queue")
+	logrus.WithField("count", len(sa.ExitQueueSurfers)).Info("processing Surfers exit queue")
 	for _, j := range sa.ExitQueueSurfers {
 		amount := j.STokenBalance.Mul(surferTokenPrice)
 
@@ -112,7 +112,7 @@ func (sa *Wavespread) StartNextEpoch() error {
 		sa.TotalBalance = sa.TotalBalance.Sub(amount)
 	}
 
-	logrus.WithField("count", len(sa.EntryQueueAnchors)).Info("processing anchors entry queue")
+	logrus.WithField("count", len(sa.EntryQueueAnchors)).Info("processing Anchors entry queue")
 	for _, s := range sa.EntryQueueAnchors {
 		sa.TotalAnchors = sa.TotalAnchors.Add(s.Amount)
 		sa.TotalBalance = sa.TotalBalance.Add(s.Amount)
@@ -124,10 +124,10 @@ func (sa *Wavespread) StartNextEpoch() error {
 		s.ATokenBalance = aTokenAmount
 		s.EntryPrice = ep
 
-		sa.anchors = append(sa.anchors, s)
+		sa.Anchors = append(sa.Anchors, s)
 	}
 
-	logrus.WithField("count", len(sa.ExitQueueAnchors)).Info("processing anchors exit queue")
+	logrus.WithField("count", len(sa.ExitQueueAnchors)).Info("processing Anchors exit queue")
 	for _, s := range sa.ExitQueueAnchors {
 		amount := s.ATokenBalance.Mul(anchorTokenPrice)
 
@@ -155,7 +155,7 @@ func (sa *Wavespread) StartNextEpoch() error {
 		sa.AnchorTokenSupply = sa.AnchorTokenSupply.Sub(aTokenAmount)
 		sa.TotalAnchors = sa.TotalAnchors.Sub(s.Amount)
 
-		//now we mint new surfers tokens based on amount
+		//now we mint new Surfers tokens based on amount
 		STokenAmount := s.Amount.Div(surferTokenPrice)
 		// mint the sTokens
 		sa.SurferTokenSupply = sa.SurferTokenSupply.Add(STokenAmount)
@@ -168,16 +168,16 @@ func (sa *Wavespread) StartNextEpoch() error {
 			STokenBalance: STokenAmount,
 		}
 
-		sa.surfers = append(sa.surfers, a)
+		sa.Surfers = append(sa.Surfers, a)
 
 		//pop the anchor from the switch queue
 		var newAnchors []*AnchorPosition
-		for _, anchor := range sa.anchors {
+		for _, anchor := range sa.Anchors {
 			if anchor.Owner != s.Owner {
 				newAnchors = append(newAnchors, anchor)
 			}
 		}
-		sa.anchors = newAnchors
+		sa.Anchors = newAnchors
 	}
 
 	logrus.WithField("count", len(sa.SwitchSideQueueSurferToAnchor)).Info("processing surfer to anchor switch queue")
@@ -187,7 +187,7 @@ func (sa *Wavespread) StartNextEpoch() error {
 		sTokenAmount := s.Amount.Div(surferTokenPrice)
 		sa.SurferTokenSupply = sa.SurferTokenSupply.Sub(sTokenAmount)
 
-		//now we mint new surfers tokens based on amount
+		//now we mint new Surfers tokens based on amount
 		ATokenAmount := s.Amount.Div(anchorTokenPrice)
 		sa.AnchorTokenSupply = sa.AnchorTokenSupply.Add(ATokenAmount)
 		sa.TotalAnchors = sa.TotalAnchors.Add(s.Amount)
@@ -202,16 +202,16 @@ func (sa *Wavespread) StartNextEpoch() error {
 		}
 
 		// Add the new anchor position
-		sa.anchors = append(sa.anchors, a)
+		sa.Anchors = append(sa.Anchors, a)
 
 		// Pop the surfer from the switch queue
 		var newSurfers []*SurferPosition
-		for _, surfer := range sa.surfers {
+		for _, surfer := range sa.Surfers {
 			if surfer.Owner != s.Owner {
 				newSurfers = append(newSurfers, surfer)
 			}
 		}
-		sa.surfers = newSurfers
+		sa.Surfers = newSurfers
 	}
 
 	// empty the queues
@@ -267,7 +267,7 @@ func (sa *Wavespread) DepositAnchor(user string, amount decimal.Decimal) error {
 
 func (sa *Wavespread) ExitAnchor(user string) error {
 	var p *AnchorPosition
-	for _, v := range sa.anchors {
+	for _, v := range sa.Anchors {
 		if v.Owner == user {
 			spew.Dump("----------------------", user, "----------------", v.Owner)
 			p = v
@@ -291,7 +291,7 @@ func (sa *Wavespread) ExitAnchor(user string) error {
 
 func (sa *Wavespread) ExitSurfer(user string) error {
 	var p *SurferPosition
-	for _, v := range sa.surfers {
+	for _, v := range sa.Surfers {
 		if v.Owner == user {
 			spew.Dump("----------------------", user, "----------------", v.Owner)
 			p = v
@@ -319,7 +319,7 @@ func (sa *Wavespread) SwitchSideAnchorToSurfer(user string) error {
 	//first we check for the user in the anchor queue
 	var p *AnchorPosition
 
-	for _, v := range sa.anchors {
+	for _, v := range sa.Anchors {
 		if v.Owner == user {
 			p = v
 			break
@@ -351,7 +351,7 @@ func (sa *Wavespread) SwitchSideSurferToAnchor(user string) error {
 	//first we check for the user in the surfer queue
 	var p *SurferPosition
 
-	for _, v := range sa.surfers {
+	for _, v := range sa.Surfers {
 		if v.Owner == user {
 			p = v
 			break
