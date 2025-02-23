@@ -1,6 +1,7 @@
 package wavespread
 
 import (
+	"github.com/davecgh/go-spew/spew"
 	"github.com/pkg/errors"
 	"github.com/shopspring/decimal"
 )
@@ -38,6 +39,7 @@ func (sa *Wavespread) TotalProfits() (decimal.Decimal, error) {
 
 	minPrice := (sa.EntryPrice.Mul(OneDec.Sub(sa.DownsideProtectionRate))).Round(18).Add(decimal.NewFromInt(1))
 
+	spew.Dump(minPrice)
 	if sa.EntryPrice.LessThanOrEqual(minPrice) {
 		return decimal.Zero, nil
 	}
