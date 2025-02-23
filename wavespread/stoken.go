@@ -1,6 +1,9 @@
 package wavespread
 
-import "github.com/shopspring/decimal"
+import (
+	"github.com/davecgh/go-spew/spew"
+	"github.com/shopspring/decimal"
+)
 
 func (sa *Wavespread) SurferTokenPrice() (decimal.Decimal, error) {
 	// surfer liquidity / surfer token supply
@@ -27,5 +30,7 @@ func (sa *Wavespread) AnchorTokenPrice() (decimal.Decimal, error) {
 		return decimal.Decimal{}, err
 	}
 
+	spew.Dump("anchorLiq", anchorLiq)
+	spew.Dump("sa.AnchorTokenSupply", sa.AnchorTokenSupply)
 	return anchorLiq.Div(sa.AnchorTokenSupply), nil
 }
