@@ -143,7 +143,7 @@ func (c *Charter) generateRandomPositions(numSurfers, numAnchors int64, start, e
 }
 
 func generateRandomSurfer(start, end time.Time) *actions.SurferPosition {
-	amount := decimal.NewFromInt(rand.Int63n(1000))
+	amount := decimal.NewFromInt(rand.Int63n(10))
 
 	return &actions.SurferPosition{
 		Action:  "surfer-entry",
@@ -154,7 +154,7 @@ func generateRandomSurfer(start, end time.Time) *actions.SurferPosition {
 }
 
 func generateRandomAnchor(start, end time.Time) *actions.AnchorPosition {
-	amount := decimal.NewFromInt(rand.Int63n(1000))
+	amount := decimal.NewFromInt(rand.Int63n(10))
 
 	return &actions.AnchorPosition{
 		Action:  "anchor-entry",
