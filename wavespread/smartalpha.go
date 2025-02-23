@@ -188,6 +188,7 @@ func (sa *Wavespread) StartNextEpoch() error {
 		sa.SurferTokenSupply = sa.SurferTokenSupply.Sub(sTokenAmount)
 
 		//now we mint new Surfers tokens based on amount
+		spew.Dump("ankor token price", anchorTokenPrice)
 		ATokenAmount := s.Amount.Div(anchorTokenPrice)
 		sa.AnchorTokenSupply = sa.AnchorTokenSupply.Add(ATokenAmount)
 		sa.TotalAnchors = sa.TotalAnchors.Add(s.Amount)
