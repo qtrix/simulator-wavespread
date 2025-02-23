@@ -1,7 +1,6 @@
 package wavespread
 
 import (
-	"github.com/davecgh/go-spew/spew"
 	"github.com/pkg/errors"
 	"github.com/shopspring/decimal"
 )
@@ -16,14 +15,19 @@ func (sa *Wavespread) TotalLoss() (decimal.Decimal, error) {
 	if err != nil {
 		return decimal.Zero, errors.Wrap(err, "could not get current price")
 	}
-	if currentPrice.LessThanOrEqual(sa.EntryPrice) {
+
+	calcPrice := decimal.Max(
+		decimal.Min(currentPrice, sa.EntryPrice),
+		sa.MinPrice(),
+	)
+
+	if calcPrice.Equal(decimal.Zero) {
 		return decimal.Zero, nil
 	}
 
-	x := currentPrice.Sub(sa.EntryPrice)
-	y := OneDec.Sub(sa.DownsideProtectionRate)
+	x := sa.EntryPrice.Div(calcPrice).Sub(OneDec)
 
-	return x.Mul(y).Mul(sa.TotalAnchors).Div(currentPrice).Round(18), nil
+	return sa.TotalAnchors.Mul(x).Round(18), nil
 }
 
 // anchor profit : total profits
@@ -33,31 +37,12 @@ func (sa *Wavespread) TotalProfits() (decimal.Decimal, error) {
 		return decimal.Zero, errors.Wrap(err, "could not get current price")
 	}
 
-	if sa.EntryPrice.LessThanOrEqual(currentPrice) {
-		return decimal.Zero, nil
-	}
+	calcPrice := decimal.Min(currentPrice, sa.EntryPrice)
 
-	minPrice := (sa.EntryPrice.Mul(OneDec.Sub(sa.DownsideProtectionRate))).Round(18).Add(decimal.NewFromInt(1))
+	x := OneDec.Sub(calcPrice.Div(currentPrice))
+	y := OneDec.Sub(sa.UpsideExposureRate)
 
-	spew.Dump(minPrice)
-	if sa.EntryPrice.LessThanOrEqual(minPrice) {
-		return decimal.Zero, nil
-	}
-
-	calcPrice := currentPrice
-	if calcPrice.LessThan(minPrice) {
-		calcPrice = minPrice
-	}
-
-	return (sa.TotalAnchors.Mul(sa.EntryPrice)).Div(calcPrice.Sub(sa.TotalAnchors)), nil
-
-	//x := currentPrice.Sub(sa.EntryPrice)
-	//y := OneDec.Sub(sa.UpsideExposureRate)
-	//
-	////x := OneDec.Sub(calcPrice.Div(currentPrice))
-	////y := OneDec.Sub(sa.UpsideExposureRate)
-	//
-	//return x.Mul(y).Mul(sa.TotalAnchors).Div(currentPrice).Round(18), nil
+	return x.Mul(y).Mul(sa.TotalAnchors).Round(18), nil
 }
 
 func (sa *Wavespread) MaxProtectionAmount() decimal.Decimal {
