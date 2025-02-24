@@ -45,7 +45,7 @@ func (a *API) Run() {
 	//	c.Header("Access-Control-Allow-Headers", "Content-Type, Authorization")
 	//	c.Status(http.StatusNoContent)
 	//})
-
+	a.engine.Use(cors.New(config))
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080" // Default port for local testing
