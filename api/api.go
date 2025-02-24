@@ -29,7 +29,7 @@ func (a *API) Run() {
 
 	// Manually configure CORS to allow all origins
 	a.engine.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"*", "https://qtrix.github.io"}, // Allow all origins
+		AllowOrigins:     []string{"https://qtrix.github.io"}, // Allow all origins
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
