@@ -38,7 +38,7 @@ func (a *API) Run() {
 	}))
 
 	a.engine.OPTIONS("/*any", func(c *gin.Context) {
-		c.Header("Access-Control-Allow-Origin", "https://qtrix.github.io")
+		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		c.Header("Access-Control-Allow-Headers", "Content-Type, Authorization")
 		c.Status(http.StatusNoContent)
