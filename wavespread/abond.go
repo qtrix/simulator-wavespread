@@ -21,17 +21,14 @@ func (sa *Wavespread) TotalLoss() (decimal.Decimal, error) {
 		return decimal.Zero, nil
 	}
 
-	// Constants
-	scaleFactor := decimal.NewFromInt(1e18) // Equivalent to SCALE_FACTOR in Solidity
-
 	// (currentPrice - entryPrice)
 	x := currentPrice.Sub(sa.EntryPrice)
 
 	// (1 - upsideExposureRate)
 	y := decimal.NewFromInt(1).Sub(sa.UpsideExposureRate)
 
-	// (current price - entry price) * (1 - upsideExposureRate) * total anchors / current price / SCALE_FACTOR
-	profits := x.Mul(y).Mul(sa.TotalAnchors).Div(currentPrice.Mul(scaleFactor))
+	// (current price - entry price) * (1 - upsideExposureRate) * total anchors / current price
+	profits := x.Mul(y).Mul(sa.TotalAnchors).Div(currentPrice)
 
 	return profits.Round(18), nil
 }
@@ -49,8 +46,7 @@ func (sa *Wavespread) TotalProfits() (decimal.Decimal, error) {
 	}
 
 	// minPrice = (entryPrice * (1 - downsideProtectionRate)) + 1
-	scaleFactor := decimal.NewFromInt(1e18) // Equivalent to SCALE_FACTOR in Solidity
-	minPrice := sa.EntryPrice.Mul(scaleFactor.Sub(sa.DownsideProtectionRate)).Div(scaleFactor).Add(decimal.NewFromInt(1))
+	minPrice := sa.EntryPrice.Mul(OneDec.Sub(sa.DownsideProtectionRate)).Add(decimal.NewFromInt(1))
 
 	// Ensure `calcPrice` is not lower than `minPrice`
 	calcPrice := decimal.Max(currentPrice, minPrice)
