@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/qtrix/simulator-wavespread/db"
 	"github.com/sirupsen/logrus"
-	"net/http"
 	"os"
 )
 
@@ -29,20 +28,23 @@ func (a *API) Run() {
 	a.engine = gin.Default()
 
 	// Manually configure CORS to allow all origins
-	a.engine.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"*"}, // Allow all origins
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
-		ExposeHeaders:    []string{"Content-Length"},
-		AllowCredentials: true,
-	}))
-
-	a.engine.OPTIONS("/*any", func(c *gin.Context) {
-		c.Header("Access-Control-Allow-Origin", "*")
-		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		c.Header("Access-Control-Allow-Headers", "Content-Type, Authorization")
-		c.Status(http.StatusNoContent)
-	})
+	config := cors.DefaultConfig()
+	config.AllowOrigins = []string{"*"}
+	config.AllowAllOrigins = true
+	//a.engine.Use(cors.New(cors.Config{
+	//	AllowOrigins:     []string{"*"}, // Allow all origins
+	//	AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+	//	AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+	//	ExposeHeaders:    []string{"Content-Length"},
+	//	AllowCredentials: true,
+	//}))
+	//
+	//a.engine.OPTIONS("/*any", func(c *gin.Context) {
+	//	c.Header("Access-Control-Allow-Origin", "*")
+	//	c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+	//	c.Header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+	//	c.Status(http.StatusNoContent)
+	//})
 
 	port := os.Getenv("PORT")
 	if port == "" {
