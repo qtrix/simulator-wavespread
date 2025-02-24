@@ -13,6 +13,7 @@ require (
 	github.com/lib/pq v1.3.0
 	github.com/pkg/errors v0.9.1
 	github.com/pressly/goose v2.6.0+incompatible
+	github.com/rs/cors v1.11.1
 	github.com/shopspring/decimal v1.2.0
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/cobra v1.1.3
