@@ -16,18 +16,24 @@ func (sa *Wavespread) TotalLoss() (decimal.Decimal, error) {
 		return decimal.Zero, errors.Wrap(err, "could not get current price")
 	}
 
-	calcPrice := decimal.Max(
-		decimal.Min(currentPrice, sa.EntryPrice),
-		sa.MinPrice(),
-	)
-
-	if calcPrice.Equal(decimal.Zero) {
+	// If current price <= entry price, there are no surfer profits
+	if currentPrice.LessThanOrEqual(sa.EntryPrice) {
 		return decimal.Zero, nil
 	}
 
-	x := sa.EntryPrice.Div(calcPrice).Sub(OneDec)
+	// Constants
+	scaleFactor := decimal.NewFromInt(1e18) // Equivalent to SCALE_FACTOR in Solidity
 
-	return sa.TotalAnchors.Mul(x).Round(18), nil
+	// (currentPrice - entryPrice)
+	x := currentPrice.Sub(sa.EntryPrice)
+
+	// (1 - upsideExposureRate)
+	y := decimal.NewFromInt(1).Sub(sa.UpsideExposureRate)
+
+	// (current price - entry price) * (1 - upsideExposureRate) * total anchors / current price / SCALE_FACTOR
+	profits := x.Mul(y).Mul(sa.TotalAnchors).Div(currentPrice.Mul(scaleFactor))
+
+	return profits.Round(18), nil
 }
 
 // anchor profit : total profits
@@ -37,12 +43,22 @@ func (sa *Wavespread) TotalProfits() (decimal.Decimal, error) {
 		return decimal.Zero, errors.Wrap(err, "could not get current price")
 	}
 
-	calcPrice := decimal.Min(currentPrice, sa.EntryPrice)
+	// If price went up, there are no losses for surfers (i.e., no profits for anchors)
+	if sa.EntryPrice.LessThanOrEqual(currentPrice) {
+		return decimal.Zero, nil
+	}
 
-	x := OneDec.Sub(calcPrice.Div(currentPrice))
-	y := OneDec.Sub(sa.UpsideExposureRate)
+	// minPrice = (entryPrice * (1 - downsideProtectionRate)) + 1
+	scaleFactor := decimal.NewFromInt(1e18) // Equivalent to SCALE_FACTOR in Solidity
+	minPrice := sa.EntryPrice.Mul(scaleFactor.Sub(sa.DownsideProtectionRate)).Div(scaleFactor).Add(decimal.NewFromInt(1))
 
-	return x.Mul(y).Mul(sa.TotalAnchors).Round(18), nil
+	// Ensure `calcPrice` is not lower than `minPrice`
+	calcPrice := decimal.Max(currentPrice, minPrice)
+
+	// (totalAnchors * entryPrice) / calcPrice - totalAnchors
+	anchorProfits := sa.TotalAnchors.Mul(sa.EntryPrice).Div(calcPrice).Sub(sa.TotalAnchors)
+
+	return anchorProfits.Round(18), nil
 }
 
 func (sa *Wavespread) MaxProtectionAmount() decimal.Decimal {
