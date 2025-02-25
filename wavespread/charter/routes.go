@@ -40,7 +40,7 @@ func (c *Charter) Run(ctx context.Context) {
 
 	// Enable CORS
 	handler := cors.New(cors.Options{
-		AllowedOrigins:   []string{"https://qtrix.github.io"}, // Replace with frontend URL
+		AllowedOrigins:   []string{"https://qtrix.github.io", "http://localhost:3000"}, // Replace with frontend URL
 		AllowedMethods:   []string{"GET", "POST", "OPTIONS"},
 		AllowedHeaders:   []string{"Content-Type", "Authorization"},
 		AllowCredentials: true,
