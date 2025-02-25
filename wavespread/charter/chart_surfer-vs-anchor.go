@@ -104,7 +104,8 @@ func (c *Charter) surferVsAnchor(w http.ResponseWriter, r *http.Request) {
 	line.Render(w)
 
 	data, _ := json.MarshalIndent(map[string]interface{}{
+		"data":    chartPoints,
 		"actions": actions,
 	}, "", "  ")
-	w.Write([]byte("<pre>" + string(data) + "</pre>"))
+	w.Write([]byte(string(data)))
 }

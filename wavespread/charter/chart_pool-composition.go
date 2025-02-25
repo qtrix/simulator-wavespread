@@ -20,7 +20,7 @@ func (c *Charter) poolCompositionChart(w http.ResponseWriter, r *http.Request) {
 		"points": params.ChartPoints,
 	}).Info("Pool composition chart requested")
 
-	chartPoints, _, err := c.simulate(params)
+	chartPoints, actions, err := c.simulate(params)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -91,7 +91,8 @@ func (c *Charter) poolCompositionChart(w http.ResponseWriter, r *http.Request) {
 	//line.Render(w)
 
 	data, _ := json.MarshalIndent(map[string]interface{}{
-		"data": chartPoints,
+		"data":    chartPoints,
+		"actions": actions,
 	}, "", "  ")
 	//spew.Dump(actions)
 	w.Write(data)

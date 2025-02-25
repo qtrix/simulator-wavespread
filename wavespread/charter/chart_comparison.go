@@ -2,6 +2,7 @@ package charter
 
 import (
 	"encoding/json"
+	"github.com/davecgh/go-spew/spew"
 	"net/http"
 
 	"github.com/sirupsen/logrus"
@@ -14,13 +15,14 @@ func (c *Charter) comparisonChart(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	spew.Dump("--------------xxxxxxxx---------------")
 	logrus.WithFields(logrus.Fields{
 		"start":  params.StartTime,
 		"end":    params.EndTime,
 		"points": params.ChartPoints,
 	}).Info("Comparison chart requested")
 
-	chartPoints, _, err := c.simulate(params)
+	chartPoints, actions, err := c.simulate(params)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -90,7 +92,10 @@ func (c *Charter) comparisonChart(w http.ResponseWriter, r *http.Request) {
 	//line.Render(w)
 
 	data, _ := json.MarshalIndent(map[string]interface{}{
-		"data": chartPoints,
+		"data":    chartPoints,
+		"actions": actions,
 	}, "", "  ")
+	spew.Dump("--------------------------------------------")
+	spew.Dump(data)
 	w.Write(data)
 }
