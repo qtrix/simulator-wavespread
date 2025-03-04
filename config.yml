@@ -50,6 +50,6 @@ sow:
     start: 2023-12-25T13:05:07Z
 
     # End of pricing data
-    stop: 2025-02-20T13:05:07Z
+    stop: 2025-02-28T13:05:07Z
 # Control what to be logged using format "module=level,module=level"; `*` means all other modules
 logging: "*=trace"
